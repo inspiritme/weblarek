@@ -5,6 +5,16 @@
     "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
+    "types": ["node"],
+
+    //alias path
+    "baseUrl": "./src",
+    "paths": {
+      "@types": ["types/index.ts"],
+      "@models/*": ["components/Models/*"],
+      "@services/*": ["components/services/*"],
+      "@classes/*": ["classes/*"],
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",
