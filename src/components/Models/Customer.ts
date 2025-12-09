@@ -1,36 +1,38 @@
 import { IBuyer, TPayment } from "@types";
 
-export class Customer implements IBuyer{
-  private _payment: TPayment = ''
-  private _address: string = ''
-  private _phone: string = ''
-  private _email: string = ''
+type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
-  constructor(){}
+export class Customer {
+  private payment: TPayment = ''
+  private address: string = ''
+  private phone: string = ''
+  private email: string = ''
 
-  set payment(value: TPayment) { this._payment = value; }
-  set address(value: string) { this._address = value; }
-  set phone(value: string) { this._phone = value; }
-  set email(value: string) { this._email = value; }
+  setInfo(info:Partial<IBuyer>): void {
+    if (info.payment !== undefined) this.payment = info.payment;
+    if (info.address !== undefined) this.address = info.address;
+    if (info.phone !== undefined) this.phone = info.phone;
+    if (info.email !== undefined) this.email = info.email;
+  }
 
   getInfo(): IBuyer {
     return {
-      'payment': this._payment,
-      'address':this._address,
-      'phone':this._phone,
-      'email':this._email,
+      'payment': this.payment,
+      'address':this.address,
+      'phone':this.phone,
+      'email':this.email,
     }
   }
 
   clearInfo(): void {
-    this._payment = '';
-    this._address = '';
-    this._phone = '';
-    this._email = '';
+    this.payment = '';
+    this.address = '';
+    this.phone = '';
+    this.email = '';
   }
 
-  validateInfo(): {[key:string]:string} {
-    let errors: {[key:string]:string} = {}
+  validateInfo(): TBuyerErrors {
+    let errors: TBuyerErrors = {}
     const info = this.getInfo()
 
     if(info.payment === '') errors.payment = 'Не выбран вид оплаты';

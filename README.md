@@ -113,6 +113,7 @@ Presenter - презентер содержит основную логику п
   ## Типы
 
   - **TPayment = "card" | "cash" | ""** — определяет способ оплаты
+  - **TBuyerErrors = Partial<Record<keyof IBuyer, string>>** - делает все поля необязательными используя интерфейс IBuyer
 
   ## Интерфейсы
 
@@ -131,33 +132,26 @@ Presenter - презентер содержит основную логику п
   - **phone: string** — телефон
 
 
-
-
 ## Модели данных (Классы)
 
-  ### Catalog (Каталог)
+  ### Products (Каталог)
   **Хранение товаров, которые можно купить в приложении**
-
   #### Поля
   - **products: IProduct[]** — хранилище всех товаров
   - **selectedProduct: IProduct|null** — выбранный товар для подробного отображения
-
   #### Методы
-  - **set products(:IProduct[]): void** — сохранение массива товаров, полученного в параметрах метода
-  - **get products(): IProduct[]** — получение массива товаров из модели
-  - **getProductById(:string): IProduct** — получение одного товара по его id
-  - **set selectedProduct(:IProduct|null): void** — сохранение товара для подробного отображения
-  - **get selectedProduct(): IProduct|null** — получение товара для подробного отображения
+  - **setItems(:IProduct[]): void** — сохранение массива товаров, полученного в параметрах метода
+  - **getItems(): IProduct[]** — получение массива товаров из модели
+  - **getItemById(:string): IProduct** — получение одного товара по его id
+  - **setSelectedItem(:IProduct|null): void** — сохранение товара для подробного отображения
+  - **getSelectedItem(): IProduct|null** — получение товара для подробного отображения
     
-
   ### Cart (Корзина)
   **Хранение товаров, которые пользователь выбрал для покупки**
-
   #### Поля
   - **cartItems: IProduct[]** — хранит массив товаров, выбранных покупателем для покупки
-
   #### Методы
-  - **get cartItems(): IProduct[]** — получение массива товаров, которые находятся в корзине
+  - **getItems(): IProduct[]** — получение массива товаров, которые находятся в корзине
   - **addItem(:IProduct): void** — добавление товара в корзину
   - **removeItem(:string): void** — удаление товара по id
   - **clearCart(): void** — очистка корзины
@@ -173,22 +167,16 @@ Presenter - презентер содержит основную логику п
   - **phone: string** — телефон покупателя
   - **email: string** — почта покупателя
   #### Методы класса Customer
-  - **set payment(:TPayment): void** — сохранение данных в модели
-  - **set address(:string): void** — сохранение данных в модели
-  - **set phone(:string): void** — сохранение данных в модели
-  - **set email(:string): void** — сохранение данных в модели
+  - **setInfo(:Partial<IBuyer>): void** — сохранение данных в модели
   - **getInfo(): IBuyer** — получение всех данных покупателя
   - **clearInfo(): void** — очистка данных покупателя
-  - **validateInfo(:IBuyer): boolean** — валидация данных
-
-
+  - **validateInfo(:TBuyerErrors): boolean** — валидация данных
 
   ## Слой коммуникации
 
   ### Communication 
   Получение товара с сервера и отправка данных о покупке на сервер используя класс API
-  
   Методы:
-    getProducts()                   -> получение товаров
-    postOrder(order: IApiPostOrder) -> отправка данных о покупке
+    **getProducts()**                   -> получение товаров
+    **postOrder(order: IApiPostOrder)** -> отправка данных о покупке
     

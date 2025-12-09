@@ -1,17 +1,17 @@
 import { IApi, IApiGetResponse, IApiPostOrder } from '@types';
 
 export class Communication{
-  private _api:IApi;
+  private api:IApi;
   constructor(api:IApi){
-    this._api = api;
+    this.api = api;
   }
 
   async getProducts(){
-    return this._api.get<IApiGetResponse>('/product/')
+    return this.api.get<IApiGetResponse>('/product/')
   }
 
   async postOrder(order:IApiPostOrder){
-    return this._api.post('/order/', order)
+    return this.api.post('/order/', order)
   }
 
 }
