@@ -1,5 +1,5 @@
 import { Component } from '../base/Component';
-import { ensureElement, cloneTemplate } from '@utils/utils';
+import { ensureElement } from '@utils/utils';
 import { IEvents } from 'components/base/Events';
 export interface ModalData{
   content: HTMLElement;

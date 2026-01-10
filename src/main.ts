@@ -44,7 +44,7 @@ communication.getProducts()
 const eventEmitter = new EventEmitter;
 const productsModel = new Products(eventEmitter);
 const cartModel = new Cart(eventEmitter);
-const customerModel = new Customer(eventEmitter);
+const customerModel = new Customer;
 const header = new Header(eventEmitter, ensureElement<HTMLElement>('.header'))
 const modal = Modal.getInstance(ensureElement<HTMLElement>('#modal-container'), eventEmitter)
 const basket = Basket.getInstance(cloneTemplate<HTMLElement>('#basket'), eventEmitter);

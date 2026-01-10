@@ -1,7 +1,7 @@
-import { Card } from "../base/Card";
-import { IProduct } from "@types";
+// import { Card } from "../base/Card";
+// import { IProduct } from "@types";
 import { ensureElement } from "@utils/utils";
-import { ICardActions } from "@types";
+// import { ICardActions } from "@types";
 import { Component } from "../base/Component";
 import { IEvents } from "components/base/Events";
 
