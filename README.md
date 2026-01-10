@@ -192,6 +192,56 @@ Presenter - презентер содержит основную логику п
 
 ```mermaid
 flowchart TD
-  A[Открыть модалку] --> B[Клик по оверлею?]
-  B -- да --> C[Закрыть модалку]
-  B -- нет --> D[Игнорировать]
+  %% === Абстрактные базовые классы ===
+  Component["Component (base)"]
+  FormBase["Form (abstract)"]
+  CardBase["Card (abstract)"]
+
+  Component --> FormBase
+  Component --> CardBase
+  Component --> Modal
+  Component --> Basket
+  Component --> Header
+  Component --> Gallery
+
+  %% === Конкретные реализации форм ===
+  FormBase --> OrderForm["OrderForm"]
+  FormBase --> ContactsForm["ContactsForm"]
+
+  %% === Конкретные реализации карточек ===
+  CardBase --> CardCatalog["CardCatalog"]
+  CardBase --> CardPreview["CardPreview"]
+  CardBase --> CardBasket["CardBasket"]
+
+  %% === Модели данных ===
+  Products["Products Model"]
+  Cart["Cart Model"]
+  Customer["Customer Model"]
+
+  %% === Event System ===
+  EventEmitter["EventEmitter"]
+
+  %% === Пользовательские действия и flow ===
+  User["User"]
+  User -->|click product card| CardCatalog
+  CardCatalog -->|emit preview| EventEmitter
+  EventEmitter --> Modal
+  Modal --> CardPreview
+  CardPreview -->|click add/remove| EventEmitter
+  EventEmitter --> Cart
+  Cart --> Basket
+  Basket -->|click checkout| EventEmitter
+  EventEmitter --> Modal
+  Modal --> OrderForm
+  OrderForm -->|submit order info| EventEmitter
+  EventEmitter --> Basket
+  Basket --> Modal
+  Modal --> ContactsForm
+  ContactsForm -->|submit contacts| EventEmitter
+  EventEmitter --> Communication["API (Communication)"]
+  Communication --> Success["Success View"]
+  Success --> EventEmitter
+  EventEmitter -->|clear cart & customer info| Cart
+  EventEmitter --> Customer
+
+
