@@ -376,111 +376,89 @@ DOM: шаблон #contacts.
 
 ```mermaid
 flowchart TD
-  %% === Абстрактные базовые классы ===
-  Component["Component (base)"]
-  FormBase["Form (abstract)"]
-  CardBase["Card (abstract)"]
+  %% =======================
+  %% Стили узлов
+  %% =======================
+  classDef userStyle fill:#a8e6cf,stroke:#333,stroke-width:1px,color:#000;
+  classDef viewStyle fill:#81c5ff,stroke:#333,stroke-width:1px,color:#000;
+  classDef modelStyle fill:#f0f0f0,stroke:#333,stroke-width:1px,color:#000;
+  classDef eventStyle fill:#ffd27f,stroke:#333,stroke-width:1px,color:#000;
 
-  Component --> FormBase
-  Component --> CardBase
-  Component --> Modal
-  Component --> Basket
-  Component --> Header
-  Component --> Gallery
+  %% =======================
+  %% Верх сайта
+  %% =======================
+  Header["Header<br>логотип, навигация, счётчик корзины"]:::viewStyle
 
-  %% === Конкретные реализации форм ===
-  FormBase --> OrderForm["OrderForm"]
-  FormBase --> ContactsForm["ContactsForm"]
+  %% =======================
+  %% Левая колонка: пользователь
+  %% =======================
+  User["User<br>клик по товарам и корзине"]:::userStyle
 
-  %% === Конкретные реализации карточек ===
-  CardBase --> CardCatalog["CardCatalog"]
-  CardBase --> CardPreview["CardPreview"]
-  CardBase --> CardBasket["CardBasket"]
+  %% =======================
+  %% Центр: Gallery
+  %% =======================
+  Gallery["Gallery<br>список товаров / карточки"]:::viewStyle
+  CardPreview["CardPreview<br>детальный просмотр"]:::viewStyle
 
-  %% === Модели данных ===
-  Products["Products Model"]
-  Cart["Cart Model"]
-  Customer["Customer Model"]
+  %% =======================
+  %% Правая колонка: корзина и модалки
+  %% =======================
+  CardBasket["CardBasket<br>иконка корзины / товар в корзине"]:::viewStyle
+  Basket["Basket View<br>корзина и оформление"]:::viewStyle
+  EmptyBasket["Empty Basket<br>пустая корзина"]:::viewStyle
+  Modal["Modal<br>всплывающие окна"]:::viewStyle
+  OrderForm["OrderForm<br>форма заказа"]:::viewStyle
+  ContactsForm["ContactsForm<br>форма контактов"]:::viewStyle
+  Success["Success View<br>успешное оформление"]:::viewStyle
 
-  %% === Event System ===
-  EventEmitter["EventEmitter"]
+  %% =======================
+  %% Модели и EventEmitter
+  %% =======================
+  EventEmitter["EventEmitter<br>шина событий"]:::eventStyle
+  Products["Products Model<br>список товаров"]:::modelStyle
+  Cart["Cart Model<br>товары в корзине"]:::modelStyle
+  Customer["Customer Model<br>данные покупателя"]:::modelStyle
+  Communication["API / Communication<br>postOrder()"]:::modelStyle
 
-  %% === Пользовательские действия и flow ===
-  User["User"]
-  User -->|click product card| CardCatalog
-  CardCatalog -->|emit preview| EventEmitter
-  EventEmitter --> Modal
+  %% =======================
+  %% Flow сайта
+  %% =======================
+
+  %% Пользователь кликает по товарам
+  User -->|клик по товару| Gallery
+  Gallery -->|emit preview| EventEmitter
+  EventEmitter -->|on preview| Modal
   Modal --> CardPreview
-  CardPreview -->|click add/remove| EventEmitter
-  EventEmitter --> Cart
-  Cart --> Basket
-  Basket -->|click checkout| EventEmitter
+  CardPreview -->|клик добавить/удалить| EventEmitter
+  EventEmitter -->|обновление корзины| Cart
+
+  %% Пользователь кликает на корзину
+  User -->|клик по корзине| CardBasket
+  CardBasket -->|открыть корзину через Modal| EventEmitter
   EventEmitter --> Modal
+  Modal --> BasketCheck["Проверка корзины: пустая / есть товары"]:::viewStyle
+  BasketCheck -->|есть товары| Basket
+  BasketCheck -->|пусто| EmptyBasket
+
+  %% Оформление заказа
+  Basket -->|click checkout| EventEmitter
+  EmptyBasket -->|click checkout| Basket
+
+  EventEmitter -->|открыть форму заказа| Modal
   Modal --> OrderForm
-  OrderForm -->|submit order info| EventEmitter
-  EventEmitter --> Basket
-  Basket --> Modal
+  OrderForm -->|submit order| EventEmitter
+  EventEmitter -->|открыть форму контактов| Modal
   Modal --> ContactsForm
-  ContactsForm -->|submit contacts| EventEmitter
-  EventEmitter --> Communication["API (Communication)"]
-  Communication --> Success["Success View"]
-  Success --> EventEmitter
-  EventEmitter -->|clear cart & customer info| Cart
+  ContactsForm -->|submit контакты| EventEmitter
+  EventEmitter -->|postOrder| Communication
+  Communication --> Success
+  EventEmitter -->|очистка корзины и данных| Cart
   EventEmitter --> Customer
 
+  %% Связь форм с моделью Customer
+  OrderForm --> Customer
+  ContactsForm --> Customer
 
-
-
- 
-  %% === Абстрактные базовые классы ===
-  Component["Component (base)<br> управляет DOM-контейнером<br> базовый класс для всех UI"]
-  FormBase["Form (abstract)<br> наследуется от Component<br> валидирует данные, эмитит события"]
-  CardBase["Card (abstract) <br> наследуется от Component<br> отображает данные товара, эмитит клики"]
-
-  %% === Конкретные реализации форм ===
-  OrderForm["OrderForm<br> наследуется от Form<br> собирает информацию о заказе<br> эмитит 'order:submit'"]
-  ContactsForm["ContactsForm<br> наследуется от Form<br> собирает контактные данные<br> эмитит 'contacts:submit'"]
-
-  FormBase --> OrderForm
-  FormBase --> ContactsForm
-
-  %% === Конкретные реализации карточек ===
-  CardCatalog["CardCatalog<br> наследуется от Card<br> показывает товары в каталоге<br> emit 'preview:open'"]
-  CardPreview["CardPreview<br> наследуется от Card<br> детальный просмотр товара<br> emit 'card:add' / 'card:remove'"]
-  CardBasket["CardBasket<br> наследуется от Card<br> отображение товара в корзине<br> emit 'card:remove'"]
-
-  CardBase --> CardCatalog
-  CardBase --> CardPreview
-  CardBase --> CardBasket
-
-  %% === Модели данных ===
-  Products["Products Model<br> хранит список товаров<br> selectedItem<br> getItems()"]
-  Cart["Cart Model<br> хранит товары в корзине<br> addItem(), removeItem(), totalPrice()"]
-  Customer["Customer Model<br> хранит данные покупателя<br> setInfo(), getInfo(), clearInfo()"]
-
-  %% === Event System ===
-  EventEmitter["EventEmitter<br> шина событий между компонентами и моделями<br> on / emit"]
-
-  %% === Сценарий пользователя ===
-  User["User"]
-  User -->|click product card| CardCatalog
-  CardCatalog -->|emit preview:open| EventEmitter
-  EventEmitter --> Modal["Modal<br> управляет отображением всплывающих окон<br> открывает CardPreview и формы"]
-  Modal --> CardPreview
-  CardPreview -->|click add/remove| EventEmitter
-  EventEmitter --> Cart
-  Cart --> Basket["Basket View<br> orchestrator оформления заказа<br> открывает формы через Modal"]
-  Basket -->|click checkout| EventEmitter
-  EventEmitter --> Modal
-  Modal --> OrderForm
-  OrderForm -->|order:submit| EventEmitter
-  EventEmitter --> Basket
-  Basket --> Modal
-  Modal --> ContactsForm
-  ContactsForm -->|contacts:submit| EventEmitter
-  EventEmitter --> Communication["API (Communication)<br> postOrder()"]
-  Communication --> Success["Success View<br> отображает успешное оформление заказа"]
-  Success --> EventEmitte
 
 
 
