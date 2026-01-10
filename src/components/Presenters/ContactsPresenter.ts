@@ -1,4 +1,4 @@
-import { FormContacts, IActions } from "@views/FormContacts";
+import { FormContacts } from "@views/FormContacts";
 import { Customer } from "@models/Customer";
 import { IEvents } from "components/base/Events";
 import { IBuyer} from "@types";

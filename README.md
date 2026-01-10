@@ -339,7 +339,7 @@ setErrors(errors) — отображает ошибки в форме.
 
 DOM: .form__errors, кнопка submit в контейнере формы.
 
-10. OrderForm
+1.  FormOrder
 
 Наследуется от: Form
 
@@ -355,7 +355,7 @@ order — когда пользователь нажал оформить зак
 
 DOM: шаблон #order.
 
-11. ContactsForm
+1.  FormContacts
 
 Наследуется от: Form
 
