@@ -1,8 +1,10 @@
 import { IProduct } from "@types"
+import { IEvents } from "components/base/Events";
 
 export class Products {
   private products: IProduct[] = []
   private selectedProduct: IProduct | null = null
+  constructor(private eventEmitter: IEvents){}
   
   setItems(items:IProduct[]):void {
     this.products = items;
@@ -20,6 +22,9 @@ export class Products {
   
   setSelectedItem(value: IProduct | null){
     this.selectedProduct = value;
+    if(this.getSelectedItem()) {
+      this.eventEmitter.emit('preview')
+    }
   }
 
   getSelectedItem(): IProduct | null{

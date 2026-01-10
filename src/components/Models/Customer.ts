@@ -1,12 +1,14 @@
 import { IBuyer, TPayment } from "@types";
 
-type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
+export type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
 export class Customer {
   private payment: TPayment = ''
   private address: string = ''
   private phone: string = ''
   private email: string = ''
+
+  constructor(){}
 
   setInfo(info:Partial<IBuyer>): void {
     if (info.payment !== undefined) this.payment = info.payment;

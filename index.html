@@ -13,7 +13,7 @@
   </head>
   <body class="page">
     <div class="page__wrapper">
-      <header class="header">
+      <header class="header"> <!--шапка страницы-->
         <div class="header__container">
           <a class="header__logo" href="/">
             <img class="header__logo-image" src="./src/images/logo.svg" alt="Web-Larek! logo" />
@@ -27,16 +27,14 @@
       <main class="gallery"></main>
     </div>
 
-    <div class="modal" id="modal-container">
+    <div class="modal" id="modal-container"> <!--модальное окно-->
       <div class="modal__container">
         <button class="modal__close" aria-label="закрыть"></button>
-        <div class="modal__content">
-
-        </div>
+        <div class="modal__content"></div>
       </div>
     </div>
 
-    <template id="success">
+    <template id="success"> <!--модальное окно--> <!--заказ принят-->
       <div class="order-success">
         <h2 class="order-success__title">Заказ оформлен</h2>
         <p class="order-success__description">Списано 0 синапсов</p>
@@ -44,7 +42,7 @@
       </div>
     </template>
 
-    <template id="card-catalog">
+    <template id="card-catalog"> <!--галерея--> <!--товар--> <!--товар галереи-->
       <button class="gallery__item card">
         <span class="card__category card__category_soft">софт-скил</span>
         <h2 class="card__title">+1 час в сутках</h2>
@@ -53,7 +51,7 @@
       </button>
     </template>
 
-    <template id="card-preview">
+    <template id="card-preview"> <!--модальное окно--> <!--товар--> <!--детальный просмотр товара-->
       <div class="card card_full">
         <img class="card__image" src="./src/images/Subtract.svg" alt="" />
         <div class="card__column">
@@ -68,7 +66,7 @@
       </div>
     </template>
 
-    <template id="card-basket">
+    <template id="card-basket"> <!--модальное окно--> <!--корзина-->  <!--товар корзины-->
       <li class="basket__item card card_compact">
         <span class="basket__item-index">1</span>
         <span class="card__title">Фреймворк куки судьбы</span>
@@ -77,7 +75,7 @@
       </li>
     </template>
 
-    <template id="basket">
+    <template id="basket">  <!--модальное окно--> <!--корзина-->
       <div class="basket">
         <h2 class="modal__title">Корзина</h2>
         <ul class="basket__list">
@@ -90,7 +88,7 @@
       </div>
     </template>
 
-    <template id="order">
+    <template id="order"> <!--модальное окно--> <!--Форма--> <!--способ оплаты-->
       <form class="form" name="order">
         <div class="order">
           <div class="order__field">
@@ -112,7 +110,7 @@
       </form>
     </template>
 
-    <template id="contacts">
+    <template id="contacts"> <!--модальное окно--> <!--Форма--> <!--контакты-->
       <form class="form" name="contacts">
         <div class="order">
           <label class="order__field">

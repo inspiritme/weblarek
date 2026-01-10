@@ -31,3 +31,17 @@ export interface IApiPostOrder extends IBuyer{
   total: number;
   items: string[];
 }
+
+export interface GalleryData{
+  catalog: HTMLElement[];
+}
+
+export interface ICardActions{
+  onClick(event: MouseEvent): void;
+}
+
+export interface IOrderActions {
+  onClick(data: Partial<IBuyer>): void;
+  onInput(data: Partial<IBuyer>): void;
+  onSubmit(): void;
+}

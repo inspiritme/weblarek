@@ -41,7 +41,7 @@ export function ensureElement<T extends HTMLElement>(selectorElement: SelectorEl
     if (selectorElement instanceof HTMLElement) {
         return selectorElement as T;
     }
-    throw new Error('Unknown selector element');
+    throw new Error('Unknown selector element'); 
 }
 
 export function cloneTemplate<T extends HTMLElement>(query: string | HTMLTemplateElement): T {
