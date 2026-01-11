@@ -36,6 +36,12 @@ export interface GalleryData{
   catalog: HTMLElement[];
 }
 
+export interface IActions{
+  modalClose():void;
+  cardToggle():void;
+  removeCard():void;
+}
+
 export interface ICardActions{
   onClick(event: MouseEvent): void;
 }

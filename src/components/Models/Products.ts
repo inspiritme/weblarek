@@ -8,6 +8,7 @@ export class Products {
   
   setItems(items:IProduct[]):void {
     this.products = items;
+    this.eventEmitter.emit('catalog', items)
   }
 
   getItems():IProduct[]{

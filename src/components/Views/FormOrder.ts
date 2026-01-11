@@ -1,48 +1,48 @@
 import { Form } from "../base/Form";
 import { ensureElement } from "@utils/utils";
-import { TPayment, IOrderActions } from "@types";
+import { TPayment, IBuyer } from "@types";
+import { IEvents } from "components/base/Events";
 
 const isPayment = (x: string): x is TPayment => x === 'card' || x === 'cash' || x === '';
 const active = 'button_alt-active';
 
-export class FormOrder extends Form{
-  protected paymentTypes: HTMLElement; 
-  protected address: HTMLInputElement;
-  constructor(container: HTMLFormElement, actions:IOrderActions){
+export class FormOrder extends Form<Partial<IBuyer>>{
+  private paymentTypes: HTMLElement; 
+  private addressEl: HTMLInputElement;
+  constructor(container: HTMLFormElement, private events:IEvents){
     super(container);
-    this.address = ensureElement<HTMLInputElement>('input[name=address]', this.container);
+    this.addressEl = ensureElement<HTMLInputElement>('input[name=address]', this.container);
     this.paymentTypes = ensureElement<HTMLElement>('.order__buttons', this.container);
 
     this.paymentTypes.addEventListener('click', (e)=>{
       if (!(e.target instanceof HTMLButtonElement)) return;
-
       const payment = e.target.name;
-      if(!isPayment(payment)) return
-
-      [...this.paymentTypes.children].forEach((el) => {
-        if(el === e.target) return;
-        el.classList.remove(active);
-      });
-      e.target.classList.toggle(active);
-
-      actions.onClick({ payment: e.target.classList.contains(active)? payment : "" });
-
+      if(!isPayment(payment)) return;
+      this.events.emit('customer:change', {payment})
     })
     
-    this.address.addEventListener('input', ()=>{
-      actions.onInput({ address: this.address.value })
+    this.addressEl.addEventListener('input', ()=>{
+      this.events.emit('customer:change', { address: this.addressEl.value })
     })
 
     this.container.addEventListener('submit', (e)=>{
       e.preventDefault()
-      actions.onSubmit();
+      this.events.emit('contacts')
     })
     
   }
 
-  setErrors = (errors: string[]) => {
-    this.errorField.textContent = errors.join(' • ');
-    this.setSubmitEnable(!errors.length)
+  set payment(value:TPayment){
+    [...this.paymentTypes.children].forEach((el) => {
+      if(el.getAttribute('name') === value) 
+        el.classList.add(active)
+      else 
+        el.classList.remove(active)
+    });
+  }
+
+  set address(value:string){
+    this.addressEl.value = value
   }
 
 }

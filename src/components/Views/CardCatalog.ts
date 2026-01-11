@@ -2,7 +2,7 @@ import { ensureElement } from '@utils/utils';
 import { IProduct } from '@types';
 import { Card } from '../base/Card';
 import { ICardActions } from '@types';
-import { applyCategory } from '@utils/applyCategory';
+import { applyCategory } from '@utils/myUtils';
 import { categoryMap } from '@utils/constants';
 
 export type CardCatalogData = Omit<IProduct, 'description'>

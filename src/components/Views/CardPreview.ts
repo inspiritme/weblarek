@@ -1,8 +1,7 @@
 import { Card } from "../base/Card";
-import { IProduct } from "@types";
+import { IActions, IProduct } from "@types";
 import { ensureElement } from "@utils/utils";
-import { ICardActions } from "@types";
-import { applyCategory } from "@utils/applyCategory";
+import { applyCategory } from "@utils/myUtils";
 import { categoryMap } from "@utils/constants";
 
 type Status = {
@@ -14,21 +13,21 @@ interface ICardPreview{
   button: Status;
 }
 
+type CardActions = Pick<IActions, 'cardToggle'>
+
 export class CardPreview extends Card<ICardPreview>{
   private cardImage: HTMLImageElement;
   private cardCategory: HTMLElement;
   private cardText: HTMLElement;
   private cardButton: HTMLButtonElement;
-  constructor(container: HTMLElement, actions?: ICardActions){
+  constructor(container: HTMLElement, actions: CardActions){
     super(container);
     this.cardImage = ensureElement<HTMLImageElement>('.card__image', this.container);
     this.cardCategory = ensureElement<HTMLElement>('.card__category', this.container);
     this.cardText = ensureElement<HTMLElement>('.card__text', this.container);
     this.cardButton = ensureElement<HTMLButtonElement>('.card__button', this.container);
 
-    if(actions?.onClick){
-      this.cardButton.addEventListener('click', actions.onClick);
-    }
+    this.cardButton.addEventListener('click', actions.cardToggle);
   }
   set image(src: string){
     this.setImage(this.cardImage, src);

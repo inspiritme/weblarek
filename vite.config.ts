@@ -22,5 +22,4 @@ export default defineConfig({
       '@views': path.resolve(__dirname, './src/components/Views'),
     }
   },
-  base: '/weblarek/',
 })

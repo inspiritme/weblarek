@@ -1,4 +1,13 @@
 import { IBuyer, TPayment } from "@types";
+import { IEvents } from "components/base/Events";
+
+type CustomerChangeType = 'order' | 'contacts';
+
+interface CustomerChangedEvent {
+  type: CustomerChangeType;
+  info: Partial<IBuyer>;
+  errors: Partial<Record<keyof IBuyer, string>>;
+}
 
 export type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
@@ -8,13 +17,39 @@ export class Customer {
   private phone: string = ''
   private email: string = ''
 
-  constructor(){}
+  constructor(private events:IEvents){}
 
-  setInfo(info:Partial<IBuyer>): void {
+  setInfo(info: Partial<IBuyer>): void {
+    const oldValues = this.getInfo();
+    const hasChanges = Object.entries(info).some(([k, v]) => oldValues[k as keyof IBuyer] !== v)
+    if (!hasChanges) return;
+
     if (info.payment !== undefined) this.payment = info.payment;
     if (info.address !== undefined) this.address = info.address;
-    if (info.phone !== undefined) this.phone = info.phone;
-    if (info.email !== undefined) this.email = info.email;
+    if (info.phone !== undefined)   this.phone   = info.phone;
+    if (info.email !== undefined)   this.email   = info.email;
+
+    const isOrderChange = info.payment !== undefined || info.address !== undefined;
+    const isContactsChange = info.phone !== undefined || info.email !== undefined;
+
+    if (isOrderChange) {
+      const data: CustomerChangedEvent = {
+        type: 'order',
+        info: this.getInfo(),
+        errors: this.validateInfo(),
+      };
+      this.events.emit('customer:changed', data);
+    }
+
+    if (isContactsChange) {
+      const data: CustomerChangedEvent = {
+        type: 'contacts',
+        info: this.getInfo(),
+        errors: this.validateInfo(),
+      };
+
+      this.events.emit('customer:changed', data);
+    }
   }
 
   getInfo(): IBuyer {
@@ -34,7 +69,7 @@ export class Customer {
   }
 
   validateInfo(): TBuyerErrors {
-    let errors: TBuyerErrors = {}
+    const errors: TBuyerErrors = {}
     const info = this.getInfo()
 
     if(info.payment === '') errors.payment = 'Не выбран вид оплаты';

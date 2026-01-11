@@ -5,7 +5,7 @@ export interface IFormData{
   element:HTMLElement
 }
 
-export abstract class Form extends Component<HTMLElement>{
+export abstract class Form<T = {}> extends Component<T>{
   protected submitButton: HTMLButtonElement;
   protected errorField: HTMLElement;
   protected  constructor(container: HTMLElement){
@@ -14,11 +14,10 @@ export abstract class Form extends Component<HTMLElement>{
     this.errorField = ensureElement<HTMLElement>('.form__errors', this.container);
   }
 
-  get element(): HTMLElement {
-    return this.container;
-  }
-
   setSubmitEnable(enabled: boolean){
     this.submitButton.disabled = !enabled;
   }
+  setErrors = (errors: string[]) => {
+    this.errorField.textContent = errors.join(' * ');
+  }  
 }

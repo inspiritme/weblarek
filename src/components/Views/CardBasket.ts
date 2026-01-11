@@ -11,14 +11,11 @@ interface IBasketView{
 export class CardBasket extends Card<IBasketView>{
   private basketIndex: HTMLElement;
   private basketDeleteButton: HTMLButtonElement;
-  constructor(container: HTMLElement, actions?: ICardActions){
+  constructor(container: HTMLElement, actions: ICardActions){
     super(container);
     this.basketIndex = ensureElement<HTMLElement>('.basket__item-index', this.container);
     this.basketDeleteButton = ensureElement<HTMLButtonElement>('.card__button', this.container);
-
-    if(actions?.onClick){
-      this.basketDeleteButton.addEventListener('click', actions.onClick)
-    }
+    this.basketDeleteButton.addEventListener('click', actions.onClick)
   }
 
   set index(value:number){

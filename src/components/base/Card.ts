@@ -16,11 +16,6 @@ export abstract class Card<T> extends Component<T>{
   }
 
   set price(value: number){
-    this.cardPrice.textContent = String(value || 'Бесценно');
+    this.cardPrice.textContent = value? `${value} синапсов` : 'Бесценно';
   }
-
-  getTemplate(){
-    return this.container;
-  }
-
 }

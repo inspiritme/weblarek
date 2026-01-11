@@ -1,7 +1,4 @@
-// import { Card } from "../base/Card";
-// import { IProduct } from "@types";
 import { ensureElement } from "@utils/utils";
-// import { ICardActions } from "@types";
 import { Component } from "../base/Component";
 import { IEvents } from "components/base/Events";
 
@@ -15,8 +12,8 @@ export class Basket extends Component<IBasketData>{
   private basketList: HTMLElement;
   private basketPrice: HTMLElement;
   private basketButton: HTMLButtonElement;
-  private static instance: Basket;
-  private constructor(container: HTMLElement, private eventEmmiter: IEvents){
+  // private static instance: Basket;
+  constructor(container: HTMLElement, private eventEmmiter: IEvents){
     super(container);
     this.basketList = ensureElement<HTMLElement>('.basket__list', this.container);
     this.basketPrice = ensureElement<HTMLButtonElement>('.basket__price', this.container);
@@ -25,12 +22,12 @@ export class Basket extends Component<IBasketData>{
     this.basketButton.addEventListener('click', this.eventEmmiter.trigger('order'))
   }
 
-  static getInstance(container: HTMLElement, eventEmmiter: IEvents) {
-      if (!this.instance) {
-        this.instance = new Basket(container, eventEmmiter);
-      }
-      return this.instance;
-  }
+  // static getInstance(container: HTMLElement, eventEmmiter: IEvents) {
+  //     if (!this.instance) {
+  //       this.instance = new Basket(container, eventEmmiter);
+  //     }
+  //     return this.instance;
+  // }
 
   get element(): HTMLElement {
     return this.container;
@@ -44,9 +41,9 @@ export class Basket extends Component<IBasketData>{
     this.basketPrice.textContent = `${value} синапсов`;
   }
 
-  setButtonState(isEnabled: boolean){
-    this.basketButton.disabled = !isEnabled;
-  }
+  // setButtonState(isEnabled: boolean){
+  //   this.basketButton.disabled = !isEnabled;
+  // }
 
   set orderButton(isEnabled:boolean){
     this.basketButton.disabled = !isEnabled;

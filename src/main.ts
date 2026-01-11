@@ -11,48 +11,50 @@ import { Modal } from '@views/Modal';
 import { Basket } from '@views/Basket';
 import { CardPreview } from '@views/CardPreview';
 import { CardBasket } from '@views/CardBasket';
-import { Success } from '@views/Success';
+import { SuccessView } from '@views/Success';
 import { CardCatalog } from '@views/CardCatalog';
 import { IApiPostOrder, IProduct } from '@types';
 import { EventEmitter } from './components/base/Events';
 import { ensureElement,cloneTemplate } from '@utils/utils';
-import { OrderPresenter } from './components/Presenters/OrderPresenter';
-import { ContactsPresenter } from './components/Presenters/ContactsPresenter';
+import { IBuyer } from '@types';
+import { FormOrder } from '@views/FormOrder';
+import { errorsArray } from '@utils/myUtils';
+import { TBuyerErrors } from '@models/Customer';
+import { FormContacts } from '@views/FormContacts';
 
 const api = new Api(API_URL);
 const communication = new Communication(api);
 communication.getProducts()
   .then(productItems => {
     productsModel.setItems(productItems.items);
-    const gallery = new Gallery(ensureElement<HTMLElement>('.gallery'))
-    const elements = productsModel.getItems();
-
-    const cards = elements.map((element)=>{
-      const onClick = () => {
-          if(productsModel.getItemById(element.id)){
-            productsModel.setSelectedItem(element);
-          }
-      }
-      return new CardCatalog(cloneTemplate<HTMLButtonElement>('#card-catalog'), {onClick}).render(element)
-    })
-    gallery.render({catalog:cards})
   })
   .catch(err => {
     console.error(err)
   })
 
 const eventEmitter = new EventEmitter;
+const modalClose = eventEmitter.trigger('modal:close')
+const cardToggle = eventEmitter.trigger('card:toggle')
+const removeCard = eventEmitter.trigger('card:remove')
+
 const productsModel = new Products(eventEmitter);
 const cartModel = new Cart(eventEmitter);
-const customerModel = new Customer;
+const customerModel = new Customer(eventEmitter);
 const header = new Header(eventEmitter, ensureElement<HTMLElement>('.header'))
-const modal = Modal.getInstance(ensureElement<HTMLElement>('#modal-container'), eventEmitter)
-const basket = Basket.getInstance(cloneTemplate<HTMLElement>('#basket'), eventEmitter);
+const modal = Modal.getInstance(ensureElement<HTMLElement>('#modal-container'), {modalClose})
+const basket = new Basket(cloneTemplate<HTMLElement>('#basket'), eventEmitter);
+const gallery = new Gallery(ensureElement<HTMLElement>('.gallery'))
+const formOrder = new FormOrder(cloneTemplate('#order'), eventEmitter);
+const formContacts = new FormContacts(cloneTemplate('#contacts'), eventEmitter);
+const cardPreview = new CardPreview(cloneTemplate('#card-preview'), {cardToggle});
+const successView = new SuccessView(cloneTemplate('#success'), {modalClose})
 
+
+export interface IInfo{info:Partial<IBuyer>, errors:TBuyerErrors, type:string}
 
 function basketContent(items:IProduct[]){
   return items.map((element,index) => {
-    const onClick = eventEmitter.trigger('card:remove', element);
+    const onClick = () => removeCard(element);
     const el = new CardBasket(cloneTemplate("#card-basket"), {onClick});
     return el.render({...element, index: ++index})
   })
@@ -61,23 +63,36 @@ function basketContent(items:IProduct[]){
 function previewContent(){
   const item = productsModel.getSelectedItem();
   if(!item) return;
-
-  const onClick = eventEmitter.trigger('card:toggle', item)
-  const card = new CardPreview(cloneTemplate('#card-preview'), {onClick});
   const isInCart = cartModel.isInCart(item.id);
   const isAvailable = !!item.price;
-  const obj = {
+  const btnState = {
     textContent: isInCart? 'Удалить из корзины' : isAvailable? 'Купить' : 'Недоступно',
     disabled: !isAvailable
   }
-  return card.render({...item,button:obj})
+  const data = isInCart? {} : item
+  return cardPreview.render({
+    ...data,
+    button:btnState
+  })
 }
 
 interface ModalOpenPayload {content: HTMLElement;}
 
+eventEmitter.on('catalog', (galleryItems:IProduct[])=>{
+  const cards = galleryItems.map((element)=>{
+    const onClick = () => {
+        if(productsModel.getItemById(element.id)){
+          productsModel.setSelectedItem(element);
+        }
+    }
+    return new CardCatalog(cloneTemplate<HTMLButtonElement>('#card-catalog'), {onClick}).render(element)
+  })
+  gallery.render({catalog:cards})
+})
+
 eventEmitter.on('modal', (data:ModalOpenPayload)=>{
   modal.render({content:data.content})
-  eventEmitter.emit('modal:open')
+  modal.open()
 })
 
 eventEmitter.on('modal:open', () => modal.open())
@@ -88,14 +103,19 @@ eventEmitter.on('modal:close', ()=>{
 })
 
 eventEmitter.on('preview', () => {
-  eventEmitter.emit('modal', {content:previewContent()})
+  modal.render({content:previewContent()})
+  modal.open()
 })
 
-eventEmitter.on('card:toggle', (item:IProduct)=>{
+eventEmitter.on('card:toggle', ()=>{
+  const item = productsModel.getSelectedItem()
+  if(!item) return
   if(cartModel.isInCart(item.id)){
-    eventEmitter.emit('card:remove', item)
+    cartModel.removeItem(item.id)
+    productsModel.setSelectedItem(null)
+    modal.close()
   } else{
-    eventEmitter.emit('card:add', item)
+    cartModel.addItem(item)
   }
 })
 
@@ -111,9 +131,13 @@ eventEmitter.on('cart:changed', ()=>{
   header.render({ counter: cartModel.totalItems() });
   basket.render({ orderButton:cartModel.totalItems()>0 });
   if(productsModel.getSelectedItem()){
-    eventEmitter.emit('preview')
+    previewContent()
   } else{
-    eventEmitter.emit('basket')
+    basket.render({
+      content: basketContent(cartModel.getItems()),
+      orderButton: Boolean(cartModel.totalItems()),
+      totalPrice: cartModel.totalPrice()
+    })
   }
 })
 
@@ -123,19 +147,38 @@ eventEmitter.on('basket', ()=>{
     orderButton: Boolean(cartModel.totalItems()),
     totalPrice: cartModel.totalPrice()
   })
-  eventEmitter.emit('modal', {
-    content:basket.element
-  })
+  modal.render({content:basket.element})
+  modal.open();
+})
+
+eventEmitter.on('customer:change', (data)=>{
+    customerModel.setInfo(data)
+})
+
+eventEmitter.on('customer:changed', (data:IInfo)=>{
+  const {payment, address, ...contacts} = data.errors;
+  if(data.type === 'order'){
+    const errors = errorsArray([payment, address] as string[])
+    formOrder.render(data.info as object)
+    formOrder.setErrors(errors)
+    formOrder.setSubmitEnable(errors.length===0)
+  } else{
+    const errors = errorsArray(Object.values(contacts))
+    formContacts.render(data.info as object)
+    formContacts.setErrors(errors)
+    formContacts.setSubmitEnable(errors.length===0)
+  }
 })
 
 eventEmitter.on('order', ()=>{
-  const {form} = new OrderPresenter(cloneTemplate('#order'), customerModel, eventEmitter);
-  eventEmitter.emit('modal', {content:form.element})
+  formOrder.setSubmitEnable(false)
+  modal.render({content:formOrder.render()})
+  modal.open()
 })
 
 eventEmitter.on('contacts', ()=>{
-  const {form} = new ContactsPresenter(cloneTemplate('#contacts'), customerModel, eventEmitter);
-  eventEmitter.emit('modal', {content:form.element})
+  formContacts.setSubmitEnable(false)
+  modal.render({content:formContacts.render()})
 })
 
 eventEmitter.on('post', ()=>{
@@ -145,17 +188,17 @@ eventEmitter.on('post', ()=>{
     total: cartModel.totalPrice(),
     items,
     ...customerInfo,
-
   } as IApiPostOrder).then(result=>{
-    const successView = new Success(cloneTemplate('#success'), eventEmitter).render(result)
-    eventEmitter.emit('clear')
-    eventEmitter.emit('modal', {content:successView})
+    cartModel.clearCart();
+    customerModel.clearInfo();
+    const info = customerModel.getInfo()
+
+    formOrder.setSubmitEnable(false)
+    formOrder.render(info);
+    formContacts.setErrors([])
+    formContacts.render(info);
+    modal.render({content:successView.render(result)})
   }) .catch(err => {
     console.error(err)
   })
-})
-
-eventEmitter.on('clear', ()=>{
-  cartModel.clearCart();
-  customerModel.clearInfo();
 })
